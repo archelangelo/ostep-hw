@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
     }
 }
 ```
-```bash
+```
 > ./p1.out
 hello, I am parent x value before change is 99
 hello, I am parent and the x value is now 39
@@ -128,4 +128,73 @@ child: 385
 child: 997
 child: 998
 child: 999
+```
+
+3. Write another program using fork(). The child process should print “hello”; the parent process should print “goodbye”. You should try to ensure that the child process always prints first; can you do this without calling wait() in the parent?
+
+- Using `wait()`.
+```c
+# include <stdio.h>
+# include <stdlib.h>
+# include <unistd.h>
+# include <sys/wait.h>
+
+int main(int argc, char *argv[]) {
+    int rc = fork();
+    if (rc < 0) {
+        fprintf(stderr, "fork failed\n");
+    } else if (rc == 0) {
+        printf("I'm child, now printing:\n");
+        printf("Hello.\n");
+    } else {
+        printf("I'm parent printing without waiting.\n");
+        wait(NULL);
+        printf("I'm parent, now printing:\n");
+        printf("Goodbye.\n");
+    }
+}
+```
+```
+> ./p3.out
+I'm parent printing without waiting.
+I'm child, now printing:
+Hello.
+I'm parent, now printing:
+Goodbye.
+```
+
+- Without using `wait()`, solution from [ahmedbilal/OSTEP-Solution](https://github.com/ahmedbilal/OSTEP-Solution/blob/master/Chapter%205/question3-yorwos.c).
+```c
+# include <stdio.h>
+# include <stdlib.h>
+# include <unistd.h>
+# include <sys/wait.h>
+
+void sighandle(int signum) {
+    printf("I'm parent, printing:\n");
+    printf("Goodbye.\n");
+}
+
+int main(int argc, char *argv[]) {
+    int rc = fork();
+    if (rc < 0) {
+        fprintf(stderr, "fork failed\n");
+    } else if (rc == 0) {
+        printf("I'm child, now printing:\n");
+        printf("Hello.\n");
+        kill(getppid(), SIGCONT);
+    } else {
+        printf("I'm parent printing without waiting.\n");
+        signal(SIGCONT, sighandle);
+        pause();
+    }
+}
+```
+```
+./p3.out
+I'm parent printing without waiting.
+I'm child, now printing:
+Hello.
+I'm parent, printing:
+Goodbye.
 ```
