@@ -199,7 +199,7 @@ I'm parent, printing:
 Goodbye.
 ```
 
-3. Write a program that calls fork() and then calls some form of exec() to run the program /bin/ls. See if you can try all of the variants of exec(), including (on Linux) execl(), execle(), execlp(), execv(), execvp(), and execvpe(). Why do you think there are so many variants of the same basic call?
+4. Write a program that calls fork() and then calls some form of exec() to run the program /bin/ls. See if you can try all of the variants of exec(), including (on Linux) execl(), execle(), execlp(), execv(), execvp(), and execvpe(). Why do you think there are so many variants of the same basic call?
 
 According to the [man page](https://linux.die.net/man/3/execvpe):
 > The exec() family of functions replaces the current process image with a new process image. The functions described in this manual page are front-ends for execve(2).
@@ -242,4 +242,37 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "fork failed\n");
     }
 }
+```
+
+5. Now write a program that uses wait() to wait for the child process to finish in the parent. What does wait() return? What happens if you use wait() in the child?
+
+`wait()` returns the process id that returns. In the child process's case the `wait()` returns `-1`.
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int main(int argc, char *argv[]) {
+    int rc = fork();
+    if (rc == 0) {
+        printf("I'm the child.\nMy pid is %d\n", getpid());
+        int wc = wait(NULL);
+        printf("wait() returns %d\n", wc);
+    } else if (rc > 0) {
+        int wc = wait(NULL);
+        printf("I'm the parent.\nchild pid is %d\nwait() returns %d\n", rc, wc);
+    } else {
+        fprintf(stderr, "fork failed\n");
+    }
+}
+```
+```
+> ./p5.out
+I'm the child.
+My pid is 25309
+wait() returns -1
+I'm the parent.
+child pid is 25309
+wait() returns 25309
 ```
