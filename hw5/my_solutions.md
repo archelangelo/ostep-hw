@@ -205,3 +205,41 @@ According to the [man page](https://linux.die.net/man/3/execvpe):
 > The exec() family of functions replaces the current process image with a new process image. The functions described in this manual page are front-ends for execve(2).
 
 So all the variants are just based on `execve`.
+
+All these variants are `exec` followed by `v`, `l`, `p`, `e`.
+
+- `v`
+Pass command line arguments as an array.
+
+- `l`
+Pass command line arguments in the parameter list.
+
+- `p`
+Use the `PATH` environment variable to search for the file to be executed. e.g. no need to specify `/bin/ls` path for the executable, just need to tell the syscall `ls`.
+
+- `e`
+Pass environment variables as a string array. e.g. `"KEY=SOMEKEY"`.
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+
+int main(int argc, char *argv[]) {
+    int rc = fork();
+    if (rc == 0) {
+        char *myargs[3];
+        char *myenv[] = {NULL};
+        myargs[0] = strdup("ls");
+        myargs[1] = strdup("./");
+        myargs[2] = NULL;
+        execlp(myargs[0], myargs[0], myargs[1], myargs[2]);
+    } else if (rc > 0) {
+        wait(NULL);
+        printf("I'm the parent.\n");
+    } else {
+        fprintf(stderr, "fork failed\n");
+    }
+}
+```

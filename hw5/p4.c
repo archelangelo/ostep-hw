@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
         char *myargs[3];
         char *myenv[] = {NULL};
         myargs[0] = strdup("ls");
-        myargs[1] = strdup("../../");
+        myargs[1] = strdup("./");
         myargs[2] = NULL;
         execlp(myargs[0], myargs[0], myargs[1], myargs[2]);
     } else if (rc > 0) {
