@@ -198,3 +198,10 @@ Hello.
 I'm parent, printing:
 Goodbye.
 ```
+
+3. Write a program that calls fork() and then calls some form of exec() to run the program /bin/ls. See if you can try all of the variants of exec(), including (on Linux) execl(), execle(), execlp(), execv(), execvp(), and execvpe(). Why do you think there are so many variants of the same basic call?
+
+According to the [man page](https://linux.die.net/man/3/execvpe):
+> The exec() family of functions replaces the current process image with a new process image. The functions described in this manual page are front-ends for execve(2).
+
+So all the variants are just based on `execve`.

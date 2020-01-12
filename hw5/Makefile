@@ -6,3 +6,6 @@ p2: p2.c
 
 p3: p3.c
 	gcc -o p3.out p3.c -Wall
+
+p4: p4.c
+	gcc -o p4.out p4.c -Wall
