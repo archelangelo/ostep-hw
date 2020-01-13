@@ -276,3 +276,37 @@ I'm the parent.
 child pid is 25309
 wait() returns 25309
 ```
+
+6. Write a slight modification of the previous program, this time using waitpid() instead of wait(). When would waitpid() be useful?
+
+`waitpid()` not only allows for waiting for a process specified by its pid, but also finer granularity of control. For example, you can wait for a certain process's certain activity (e.g. CONTINUE, STOP, etc.)
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
+
+int main(int argc, char *argv[]) {
+    int rc = fork();
+    if (rc == 0) {
+        printf("I'm the child.\nMy pid is %d\n", getpid());
+        int wc = wait(NULL);
+        printf("wait() returns %d\n", wc);
+    } else if (rc > 0) {
+        int wc = waitpid(rc, NULL, 0);
+        printf("I'm the parent.\nchild pid is %d\nwait() returns %d\n", rc, wc);
+    } else {
+        fprintf(stderr, "fork failed\n");
+    }
+}
+```
+```
+> ./p6.out
+I'm the child.
+My pid is 26432
+wait() returns -1
+I'm the parent.
+child pid is 26432
+wait() returns 26432
+```
