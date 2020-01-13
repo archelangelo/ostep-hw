@@ -18,3 +18,6 @@ p6: p6.c
 
 p7: p7.c
 	gcc -o p7.out p7.c -Wall
+
+p8: p8.c
+	gcc -o p8.out p8.c -Wall
