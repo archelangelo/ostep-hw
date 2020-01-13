@@ -310,3 +310,36 @@ I'm the parent.
 child pid is 26432
 wait() returns 26432
 ```
+
+7. Write a program that creates a child process, and then in the child closes standard output (STDOUT FILENO). What happens if the child calls printf() to print some output after closing the descriptor?
+
+After the child closes the `STDOUT_FILENO` descriptor, there is not output from child.
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int main(int argc, char *argv[]) {
+    int rc = fork();
+    if (rc == 0) {
+        printf("I'm the child before STDOUT_FILENO is clsoed.\n");
+        close(STDOUT_FILENO);
+        printf("I'm the child after STDOUT_FILENO is clsoed.\n");
+    } else if (rc > 0) {
+        int wc = wait(NULL);
+        printf("I'm the parent.\nchild pid is %d\nwait() returns %d\n", rc, wc);
+    } else {
+        fprintf(stderr, "fork failed\n");
+    }
+}
+```
+```
+> ./p7.out
+I'm the child before STDOUT_FILENO is clsoed.
+I'm the parent.
+child pid is 26970
+wait() returns 26970
+```
+
+8. Write a program that creates two children, and connects the standard output of one to the standard input of the other, using the pipe() system call.
