@@ -13,6 +13,17 @@ long calculate_time_in_us(struct timeval tv0, struct timeval tv1) {
     return (tv1.tv_sec - tv0.tv_sec) * 1000000 + tv1.tv_usec - tv0.tv_usec;
 }
 
+void set_cpu_affinity(int cpu_selection) {
+    // Set cpu affinity
+    cpu_set_t cpu_set;
+    CPU_ZERO(&cpu_set);
+    CPU_SET(cpu_selection, &cpu_set);
+    if (sched_setaffinity(0, sizeof(cpu_set), &cpu_set) != 0) {
+        printf("Failed to set affinity.\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
 int main(int argc, char *argv[]) {
     printf("Parent before everything: pid %d cpu %d\n", getpid(), sched_getcpu());
 
@@ -21,17 +32,6 @@ int main(int argc, char *argv[]) {
         printf("Usage: measure_context_switching <CPU>\n");
         exit(EXIT_FAILURE);
     }
-
-    // Set cpu affinity
-    int cpu_selection = atoi(argv[1]);
-    cpu_set_t cpu_set;
-    CPU_ZERO(&cpu_set);
-    CPU_SET(cpu_selection, &cpu_set);
-    if (sched_setaffinity(0, sizeof(cpu_set), &cpu_set) != 0) {
-        printf("Failed to set affinity.\n");
-        exit(EXIT_FAILURE);
-    }
-    printf("Parent after setting affinity: pid %d cpu %d\n", getpid(), sched_getcpu());
 
     // Open pipes
     int pfdp[2], pfdc[2];
@@ -44,6 +44,7 @@ int main(int argc, char *argv[]) {
     int rc = fork();
     if (rc == 0) {
         // Child
+        set_cpu_affinity(atoi(argv[1]));
         printf("Child: pid %d cpu %d\n", getpid(), sched_getcpu());
         close(pfdp[1]);
         close(pfdc[0]);
@@ -55,6 +56,7 @@ int main(int argc, char *argv[]) {
         close(pfdc[1]);
     } else if (rc > 0) {
         // Parent
+        set_cpu_affinity(atoi(argv[1]));
         printf("Parent: pid %d cpu %d\n", getpid(), sched_getcpu());
         close(pfdc[1]);
         close(pfdp[0]);
